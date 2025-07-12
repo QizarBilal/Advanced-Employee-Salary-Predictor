@@ -55,6 +55,7 @@ def generate_simple_dataset(num_records=5000):
     departments = ['Technology', 'Finance', 'Marketing', 'Sales', 'HR', 'Operations']
     education_levels = ['High School', 'Diploma', 'Bachelor', 'Master', 'PhD']
     company_sizes = ['Small (50-200)', 'Medium (200-1000)', 'Large (1000-5000)', 'Enterprise (5000+)']
+    industries = ['IT Services', 'Banking', 'Healthcare', 'Manufacturing', 'E-commerce', 'Consulting']
     
     data = []
     
@@ -73,7 +74,20 @@ def generate_simple_dataset(num_records=5000):
         city_tier = city_tiers[city]
         department = np.random.choice(departments)
         company_size = np.random.choice(company_sizes)
+        industry = np.random.choice(industries)
         performance_rating = np.random.choice([2, 3, 4, 5], p=[0.1, 0.4, 0.4, 0.1])
+        
+        # Technical skills and certifications
+        base_skills = 40 + years_experience * 3 + {'High School': 0, 'Diploma': 5, 'Bachelor': 10, 'Master': 15, 'PhD': 20}[education]
+        technical_skills_score = max(20, min(100, base_skills + np.random.normal(0, 10)))
+        
+        # Certifications
+        cert_count = 0
+        if years_experience > 3 and np.random.random() < 0.6:
+            cert_count += 1
+        if education in ['Master', 'PhD'] and np.random.random() < 0.4:
+            cert_count += 1
+        certifications_count = cert_count
         
         # Calculate salary
         base_salary = 400000
@@ -86,6 +100,8 @@ def generate_simple_dataset(num_records=5000):
         salary = base_salary * edu_mult[education] * dept_mult[department] * city_mult[city_tier]
         salary *= (1 + years_experience * 0.08)
         salary *= (performance_rating / 3.0)
+        salary *= (1 + technical_skills_score / 100 * 0.2)  # Skills factor
+        salary *= (1 + certifications_count * 0.05)  # Certification bonus
         salary *= np.random.uniform(0.9, 1.1)
         
         # Add outliers
@@ -102,7 +118,10 @@ def generate_simple_dataset(num_records=5000):
             'city_tier': city_tier,
             'department': department,
             'company_size': company_size,
+            'industry': industry,
             'performance_rating': performance_rating,
+            'technical_skills_score': round(technical_skills_score, 1),
+            'certifications_count': certifications_count,
             'annual_salary': int(salary)
         })
     

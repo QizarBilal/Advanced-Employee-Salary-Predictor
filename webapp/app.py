@@ -651,35 +651,50 @@ def show_data_exploration_page(df):
         
         with col1:
             # Company size distribution
-            size_counts = filtered_df['company_size'].value_counts()
-            fig7 = px.bar(
-                x=size_counts.index,
-                y=size_counts.values,
-                title="Company Size Distribution"
-            )
-            fig7.update_xaxes(tickangle=45)
-            st.plotly_chart(fig7, use_container_width=True)
+            if 'company_size' in filtered_df.columns:
+                size_counts = filtered_df['company_size'].value_counts()
+                fig7 = px.bar(
+                    x=size_counts.index,
+                    y=size_counts.values,
+                    title="Company Size Distribution"
+                )
+                fig7.update_xaxes(tickangle=45)
+                st.plotly_chart(fig7, use_container_width=True)
+            else:
+                st.info("Company size information not available in current dataset.")
             
         with col2:
-            # Industry distribution
-            industry_counts = filtered_df['industry'].value_counts().head(10)
-            fig8 = px.bar(
-                x=industry_counts.values,
-                y=industry_counts.index,
-                orientation='h',
-                title="Top 10 Industries"
-            )
-            st.plotly_chart(fig8, use_container_width=True)
+            # Industry distribution or City distribution as fallback
+            if 'industry' in filtered_df.columns:
+                industry_counts = filtered_df['industry'].value_counts().head(10)
+                fig8 = px.bar(
+                    x=industry_counts.values,
+                    y=industry_counts.index,
+                    orientation='h',
+                    title="Top 10 Industries"
+                )
+                st.plotly_chart(fig8, use_container_width=True)
+            elif 'city' in filtered_df.columns:
+                city_counts = filtered_df['city'].value_counts().head(10)
+                fig8 = px.bar(
+                    x=city_counts.values,
+                    y=city_counts.index,
+                    orientation='h',
+                    title="Top 10 Cities"
+                )
+                st.plotly_chart(fig8, use_container_width=True)
+            else:
+                st.info("Industry/City information not available in current dataset.")
     
     with tab4:
-        # Correlation heatmap
-        numerical_cols = ['age', 'years_experience', 'technical_skills_score', 
-                         'performance_rating', 'certifications_count', 'annual_salary']
+        # Correlation heatmap - only use available numerical columns
+        potential_numerical_cols = ['age', 'years_experience', 'technical_skills_score', 
+                                  'performance_rating', 'certifications_count', 'annual_salary']
         
-        available_cols = [col for col in numerical_cols if col in filtered_df.columns]
+        available_numerical_cols = [col for col in potential_numerical_cols if col in filtered_df.columns]
         
-        if len(available_cols) > 1:
-            corr_matrix = filtered_df[available_cols].corr()
+        if len(available_numerical_cols) > 1:
+            corr_matrix = filtered_df[available_numerical_cols].corr()
             
             fig9 = px.imshow(
                 corr_matrix,
@@ -689,13 +704,15 @@ def show_data_exploration_page(df):
                 aspect="auto"
             )
             st.plotly_chart(fig9, use_container_width=True)
+        else:
+            st.info("Insufficient numerical columns for correlation analysis.")
             
         # Feature importance (if available)
         st.markdown("#### 🎯 Feature Impact on Salary")
         try:
             from sklearn.ensemble import RandomForestRegressor
             
-            # Prepare data for feature importance
+            # Prepare data for feature importance - only use available numerical columns
             numeric_features = filtered_df.select_dtypes(include=[np.number]).columns.tolist()
             if 'annual_salary' in numeric_features:
                 numeric_features.remove('annual_salary')
@@ -721,8 +738,30 @@ def show_data_exploration_page(df):
                 )
                 st.plotly_chart(fig10, use_container_width=True)
                 
+                # Show top features
+                st.markdown("**Top 3 Most Important Features:**")
+                top_features = importance_df.tail(3)
+                for _, row in top_features.iterrows():
+                    st.write(f"• **{row['feature']}**: {row['importance']:.3f}")
+            else:
+                st.info("No numerical features available for importance analysis.")
+                
         except ImportError:
-            st.info("Feature importance analysis requires scikit-learn.")
+            st.warning("Scikit-learn not available. Feature importance analysis disabled.")
+        except Exception as e:
+            st.error(f"Error in feature importance analysis: {str(e)}")
+            
+        # Additional statistics
+        st.markdown("#### 📈 Key Statistics")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Average Salary", format_currency(filtered_df['annual_salary'].mean()))
+        with col2:
+            st.metric("Median Salary", format_currency(filtered_df['annual_salary'].median()))
+        with col3:
+            std_salary = filtered_df['annual_salary'].std()
+            st.metric("Salary Std Dev", format_currency(std_salary))
 
 def show_model_analytics_page(df):
     """Display model performance analytics."""
