@@ -17,6 +17,15 @@ def get_python_executable():
 def run_streamlit_app():
     """Launch the Streamlit web application."""
     python_exe = get_python_executable()
+    
+    # Ensure dataset exists before starting the app
+    print("🔄 Ensuring dataset exists...")
+    try:
+        subprocess.run([python_exe, "ensure_dataset.py"], cwd=Path(__file__).parent, check=True)
+        print("✅ Dataset ready!")
+    except subprocess.CalledProcessError:
+        print("⚠️  Warning: Could not ensure dataset exists. App may run in demo mode.")
+    
     cmd = [python_exe, "-m", "streamlit", "run", "webapp/app.py"]
     
     print("🚀 Starting Streamlit Web Application...")

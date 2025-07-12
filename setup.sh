@@ -11,3 +11,7 @@ headless = true\n\
 enableCORS=false\n\
 port = \$PORT\n\
 " > ~/.streamlit/config.toml
+
+# Ensure dataset exists
+echo "🔄 Ensuring dataset exists..."
+python ensure_dataset.py

@@ -68,29 +68,128 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Helper functions
+def generate_dataset_if_missing():
+    """Generate dataset if it doesn't exist."""
+    import os
+    
+    # Check if dataset exists in any location
+    possible_paths = [
+        'data/raw/employee_salary_dataset.csv',
+        '../data/raw/employee_salary_dataset.csv',
+        './data/raw/employee_salary_dataset.csv'
+    ]
+    
+    # If dataset exists, return the path
+    for path in possible_paths:
+        if os.path.exists(path):
+            return path
+    
+    # If dataset doesn't exist, generate it
+    st.info("🔄 Dataset not found. Generating new dataset...")
+    
+    try:
+        # Create data directories if they don't exist
+        os.makedirs('data/raw', exist_ok=True)
+        
+        # Generate dataset using inline function (simplified version)
+        df = generate_employee_dataset_inline()
+        
+        # Save dataset
+        dataset_path = 'data/raw/employee_salary_dataset.csv'
+        df.to_csv(dataset_path, index=False)
+        
+        st.success("✅ Dataset generated successfully!")
+        return dataset_path
+        
+    except Exception as e:
+        st.error(f"❌ Error generating dataset: {e}")
+        return None
+
+def generate_employee_dataset_inline(num_records=5000):
+    """Generate a simplified employee dataset inline."""
+    np.random.seed(42)
+    
+    # Define basic data categories
+    cities = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad']
+    city_tiers = {'Mumbai': 'Tier 1', 'Delhi': 'Tier 1', 'Bangalore': 'Tier 1', 'Hyderabad': 'Tier 1',
+                  'Chennai': 'Tier 1', 'Kolkata': 'Tier 2', 'Pune': 'Tier 2', 'Ahmedabad': 'Tier 2'}
+    
+    departments = ['Technology', 'Finance', 'Marketing', 'Sales', 'HR', 'Operations']
+    education_levels = ['High School', 'Diploma', 'Bachelor', 'Master', 'PhD']
+    company_sizes = ['Small (50-200)', 'Medium (200-1000)', 'Large (1000-5000)', 'Enterprise (5000+)']
+    
+    data = []
+    
+    for i in range(num_records):
+        # Generate basic features
+        age = max(22, min(65, int(np.random.normal(32, 8))))
+        gender = np.random.choice(['Male', 'Female'], p=[0.65, 0.35])
+        education = np.random.choice(education_levels, p=[0.1, 0.15, 0.4, 0.3, 0.05])
+        
+        # Experience based on age and education
+        min_exp = max(0, age - 22 - (4 if education in ['Bachelor', 'Master'] else 2))
+        max_exp = age - 18
+        years_experience = max(0, min(max_exp, int(np.random.normal(min_exp + 3, 3))))
+        
+        city = np.random.choice(cities)
+        city_tier = city_tiers[city]
+        department = np.random.choice(departments)
+        company_size = np.random.choice(company_sizes)
+        performance_rating = np.random.choice([2, 3, 4, 5], p=[0.1, 0.4, 0.4, 0.1])
+        
+        # Calculate salary based on factors
+        base_salary = 400000
+        
+        # Education multiplier
+        edu_mult = {'High School': 0.7, 'Diploma': 0.8, 'Bachelor': 1.0, 'Master': 1.3, 'PhD': 1.6}
+        
+        # Department multiplier
+        dept_mult = {'Technology': 1.4, 'Finance': 1.2, 'Marketing': 1.0, 'Sales': 1.1, 'HR': 0.9, 'Operations': 1.0}
+        
+        # City tier multiplier
+        city_mult = {'Tier 1': 1.3, 'Tier 2': 1.1, 'Tier 3': 1.0}
+        
+        # Calculate final salary
+        salary = base_salary * edu_mult[education] * dept_mult[department] * city_mult[city_tier]
+        salary *= (1 + years_experience * 0.08)  # Experience factor
+        salary *= (performance_rating / 3.0)  # Performance factor
+        salary *= np.random.uniform(0.9, 1.1)  # Random variation
+        
+        # Add some outliers
+        if np.random.random() < 0.05:
+            salary *= np.random.uniform(1.5, 3.0)
+        
+        data.append({
+            'employee_id': f'EMP_{i+1:05d}',
+            'age': age,
+            'gender': gender,
+            'education_level': education,
+            'years_experience': years_experience,
+            'city': city,
+            'city_tier': city_tier,
+            'department': department,
+            'company_size': company_size,
+            'performance_rating': performance_rating,
+            'annual_salary': int(salary)
+        })
+    
+    return pd.DataFrame(data)
+
 @st.cache_data
 def load_dataset():
     """Load the employee dataset."""
     try:
-        # Try multiple possible paths
-        possible_paths = [
-            'data/raw/employee_salary_dataset.csv',
-            '../data/raw/employee_salary_dataset.csv',
-            './data/raw/employee_salary_dataset.csv'
-        ]
+        # First, ensure dataset exists (generate if missing)
+        dataset_path = generate_dataset_if_missing()
         
-        for path in possible_paths:
-            try:
-                df = pd.read_csv(path)
-                return df
-            except FileNotFoundError:
-                continue
-        
-        # If none of the paths work, raise an error
-        raise FileNotFoundError("Dataset not found in any expected location")
+        if dataset_path:
+            df = pd.read_csv(dataset_path)
+            return df
+        else:
+            return None
+            
     except Exception as e:
         st.error(f"Error loading dataset: {e}")
-        st.info("Please run the data generation script first: `python generate_data.py`")
         return None
 
 @st.cache_data
