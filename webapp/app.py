@@ -604,14 +604,24 @@ def show_data_exploration_page(df):
             st.plotly_chart(fig2, use_container_width=True)
         
         # Experience vs Salary colored by education
-        fig3 = px.scatter(
-            filtered_df.sample(min(1000, len(filtered_df))),
-            x='years_experience',
-            y='annual_salary',
-            color='education_level',
-            title="Experience vs Salary by Education Level",
-            trendline="ols"
-        )
+        try:
+            fig3 = px.scatter(
+                filtered_df.sample(min(1000, len(filtered_df))),
+                x='years_experience',
+                y='annual_salary',
+                color='education_level',
+                title="Experience vs Salary by Education Level",
+                trendline="ols"
+            )
+        except (ImportError, ModuleNotFoundError):
+            # Fallback without trendline if statsmodels is not available
+            fig3 = px.scatter(
+                filtered_df.sample(min(1000, len(filtered_df))),
+                x='years_experience',
+                y='annual_salary',
+                color='education_level',
+                title="Experience vs Salary by Education Level"
+            )
         st.plotly_chart(fig3, use_container_width=True)
     
     with tab2:
