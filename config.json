@@ -1,0 +1,96 @@
+{
+    "random_seed": 42,
+    "test_size": 0.2,
+    "val_size": 0.15,
+    "cv_folds": 5,
+    "target_currency": "INR",
+    "target_column": "annual_salary",
+    "data_paths": {
+        "raw_data": "data/raw/employee_salary_dataset.csv",
+        "processed_data": "data/processed/",
+        "external_data": "data/external/"
+    },
+    "model_config": {
+        "save_path": "models/",
+        "model_format": "pkl",
+        "save_artifacts": true
+    },
+    "preprocessing": {
+        "missing_value_strategy": "knn",
+        "outlier_method": "iqr",
+        "outlier_threshold": 3.0,
+        "scaling_method": "standard",
+        "encoding_method": "onehot",
+        "handle_outliers": true,
+        "drop_outliers": false
+    },
+    "feature_engineering": {
+        "create_interaction_features": true,
+        "create_polynomial_features": false,
+        "polynomial_degree": 2,
+        "feature_selection_method": "random_forest",
+        "n_features_to_select": 50,
+        "apply_pca": false,
+        "pca_variance_threshold": 0.95,
+        "create_domain_features": true
+    },
+    "model_params": {
+        "random_forest": {
+            "n_estimators": 100,
+            "max_depth": 15,
+            "min_samples_split": 5,
+            "min_samples_leaf": 2,
+            "random_state": 42,
+            "n_jobs": -1
+        },
+        "xgboost": {
+            "n_estimators": 100,
+            "max_depth": 6,
+            "learning_rate": 0.1,
+            "subsample": 0.8,
+            "colsample_bytree": 0.8,
+            "random_state": 42,
+            "n_jobs": -1
+        },
+        "lightgbm": {
+            "n_estimators": 100,
+            "max_depth": 6,
+            "learning_rate": 0.1,
+            "num_leaves": 31,
+            "subsample": 0.8,
+            "colsample_bytree": 0.8,
+            "random_state": 42,
+            "n_jobs": -1
+        },
+        "linear_regression": {
+            "fit_intercept": true,
+            "normalize": false
+        }
+    },
+    "evaluation_metrics": [
+        "r2_score",
+        "mean_squared_error",
+        "mean_absolute_error",
+        "mean_absolute_percentage_error"
+    ],
+    "hyperparameter_tuning": {
+        "method": "optuna",
+        "n_trials": 100,
+        "timeout": 3600,
+        "n_jobs": -1
+    },
+    "visualization": {
+        "style": "seaborn",
+        "color_palette": "husl",
+        "figure_size": [12, 8],
+        "save_plots": true,
+        "plot_format": "png",
+        "plot_dpi": 300
+    },
+    "webapp": {
+        "title": "Employee Salary Prediction System",
+        "port": 8501,
+        "theme": "light",
+        "sidebar_state": "expanded"
+    }
+}

@@ -1,0 +1,91 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Streamlit App",
+            "type": "shell",
+            "command": "C:/Users/We/AppData/Local/Programs/Python/Python310/python.exe",
+            "args": ["-m", "streamlit", "run", "webapp/app.py"],
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Start Jupyter Notebook",
+            "type": "shell",
+            "command": "C:/Users/We/AppData/Local/Programs/Python/Python310/python.exe",
+            "args": ["-m", "jupyter", "notebook"],
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Generate Dataset",
+            "type": "shell",
+            "command": "C:/Users/We/AppData/Local/Programs/Python/Python310/python.exe",
+            "args": ["-m", "jupyter", "nbconvert", "--execute", "--to", "notebook", "notebooks/01_data_generation.ipynb"],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Install Dependencies",
+            "type": "shell",
+            "command": "C:/Users/We/AppData/Local/Programs/Python/Python310/python.exe",
+            "args": ["-m", "pip", "install", "-r", "requirements.txt"],
+            "group": "build",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Test Data Processing",
+            "type": "shell",
+            "command": "C:/Users/We/AppData/Local/Programs/Python/Python310/python.exe",
+            "args": ["-c", "from src.data_preprocessing import DataPreprocessor; print('✅ Data preprocessing module ready!')"],
+            "group": "test",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Test Feature Engineering",
+            "type": "shell",
+            "command": "C:/Users/We/AppData/Local/Programs/Python/Python310/python.exe",
+            "args": ["-c", "from src.feature_engineering import FeatureEngineer; print('✅ Feature engineering module ready!')"],
+            "group": "test",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            }
+        }
+    ]
+}

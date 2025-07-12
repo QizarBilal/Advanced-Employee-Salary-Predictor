@@ -1,0 +1,13 @@
+version: 1.0
+services:
+  - name: employee-salary-prediction
+    source:
+      repo: https://github.com/yourusername/your-repo-name
+    build:
+      commands:
+        - pip install -r requirements.txt
+    start:
+      command: streamlit run webapp/app.py --server.port $PORT --server.address 0.0.0.0
+    env:
+      - key: PORT
+        value: 8080
